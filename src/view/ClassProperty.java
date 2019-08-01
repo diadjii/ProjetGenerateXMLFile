@@ -1,8 +1,11 @@
+package view;
+
 import java.util.ArrayList;
 
 public class ClassProperty {
     private String name;
     private String type;
+
     static ArrayList<ClassProperty> listPropreties = new ArrayList<>();
 
     public ClassProperty() {

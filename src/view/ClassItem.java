@@ -1,10 +1,15 @@
+package view;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ClassItem {
     private String className;
     private ArrayList<ClassProperty> listProperty = new ArrayList<>();
 
-    static ArrayList<ClassItem> listClass = new ArrayList<>();
+    private HashMap<String, String> propertiesOcc = new HashMap<>();
+
+    public static ArrayList<ClassItem> listClass = new ArrayList<>();
 
     public ClassItem() {
     }
@@ -35,14 +40,23 @@ public class ClassItem {
 
     }
 
+    public void addToHashmap(String propertyName, String propertyOcc) {
+	this.propertiesOcc.put(propertyName, propertyOcc);
+    }
+
+    public HashMap<String, String> getPropertiesOcc() {
+	return this.propertiesOcc;
+    }
+
     @Override
     public String toString() {
-	System.out.println("Nom Class : *" + this.className + "*");
+	String text = "";
+	text += "Nom Class : *" + this.className + "*\n";
 
-	this.listProperty.forEach(item -> {
-	    System.out.println("Nom Propriete : " + item.getName() + " Type Propriete : " + item.getType());
-	});
-
-	return "-------------Fin---------------";
+	for (ClassProperty item : this.listProperty) {
+	    text += "Nom Propriete : " + item.getName() + " Type Propriete : " + item.getType() + "\n";
+	}
+	text += "\n-------------------FIN---------------\n\n";
+	return text;
     }
 }

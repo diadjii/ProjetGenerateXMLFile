@@ -1,3 +1,5 @@
+package view;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -17,21 +19,22 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public class Main {
+public class HelperClass {
 
-    static String TYPE_COMPLEX = "xs:complexType";
+    static ArrayList<File> listFiles = new ArrayList<>();
 
-    public static void main(String[] args) {
+    public static void generateClassFromXSD() {
 	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
 	try {
 	    DocumentBuilder builder = factory.newDocumentBuilder();
 	    factory.setIgnoringElementContentWhitespace(true);
 
-	    File xmlFile = new File("test.xsd");
+	    File xmlFile = new File("fichiers/test.xsd");
 
 	    Document xml = builder.parse(xmlFile);
 	    Element root = xml.getDocumentElement();
+
 	    NodeList list = root.getElementsByTagName("xs:element");
 
 	    for (int i = 0; i < list.getLength(); i++) {
@@ -46,37 +49,36 @@ public class Main {
 
 			NodeList childList = e.getChildNodes();
 
-			createProppertyFromElement(childList, classItem);
+			createPropertyFromElement(childList, classItem);
 
 			ClassItem.listClass.add(classItem);
 
 		    } else {
 			/*
-			 * Dans cette section on verifie d'abord si l'element a un attribut #name 1-Si
-			 * c'est le cas on regarde s'il n'existe pas deja dans la liste des attributs
-			 * deja créé sinon on l'ajoute dans la liste.Et s'il existe, on regarde dans la
-			 * liste si le type du propriete dans la liste ressemble à celui de l'element en
-			 * cours sinon on le remplace par celui de l'element en cours.
+			 * Dans cette section on verifie d'abord si l'element a un attribut #name <br>
+			 * 1-Si c'est le cas on regarde s'il n'existe pas deja dans la liste des
+			 * attributs deja créé sinon on l'ajoute dans la liste<br>. Et s'il existe, on
+			 * regarde dans la liste si le type du propriete dans la liste ressemble à celui
+			 * de l'element en cours sinon on le remplace par celui de l'element en cours.
 			 */
 			ClassProperty property = new ClassProperty();
 
 			if (e.hasAttribute("name")) {
-			    if (!checkPropertyExist(e.getAttribute("name"))) {
+			    String nomAttribut = e.getAttribute("name");
 
-				property.setName(e.getAttribute("name"));
+			    if (!checkPropertyExist(nomAttribut)) {
+				property.setName(nomAttribut);
 				property.setType(e.getAttribute("type").split(":")[1]);
 
 				ClassProperty.listPropreties.add(property);
 			    } else {
 
 				for (ClassProperty p : ClassProperty.listPropreties) {
-				    if (p.getName().equals(e.getAttribute("name"))
-					    && p.getType().equals(e.getAttribute("name"))) {
+				    if (p.getName().equals(nomAttribut) && p.getType().equals(nomAttribut)) {
 					p.setType(e.getAttribute("type").split(":")[1]);
 				    }
 				}
 			    }
-
 			} else {
 			    if (!checkPropertyExist(e.getAttribute("ref"))) {
 				property.setName(e.getAttribute("ref"));
@@ -88,10 +90,12 @@ public class Main {
 		    }
 		}
 	    }
-	    ClassProperty.listPropreties
-		    .forEach(prop -> System.out.println(prop.getName() + " Type : " + prop.getType()));
-	    ClassItem.listClass.forEach(cl -> System.out.println(cl));
-	    createJavaClasse();
+
+	    generateJavaClasse();
+
+	    // for (int i = (listFiles.size() - 1); i > -1; i--) {
+	    // compile(listFiles.get(i));
+	    // }
 	} catch (ParserConfigurationException | SAXException | IOException e) {
 	    e.printStackTrace();
 	}
@@ -106,16 +110,17 @@ public class Main {
 		break;
 	    }
 	}
+
 	return response;
     }
 
-    public static void createProppertyFromElement(NodeList list, ClassItem currentClass) {
+    public static void createPropertyFromElement(NodeList list, ClassItem currentClass) {
 	for (int j = 0; j < list.getLength(); j++) {
 
 	    if (list.item(j) instanceof Element) {
 		Element def = (Element) list.item(j);
 
-		if (def.getTagName().equals(TYPE_COMPLEX)) {
+		if (def.getTagName().equals("complexType")) {
 		    NodeList defChild = def.getChildNodes();
 
 		    Element sequenceNode = (Element) defChild.item(1);
@@ -138,13 +143,20 @@ public class Main {
 				}
 			    } else {
 				if (!checkPropertyExist(item.getAttribute("ref"))) {
+
 				    property.setName(item.getAttribute("ref"));
 				    property.setType(item.getAttribute("ref"));
 
+				    if (item.hasAttribute("maxOccurs")) {
+					String nbreItem = item.getAttribute("maxOccurs");
+
+					if (nbreItem.equals("unbounded")) {
+					    currentClass.addToHashmap(property.getName(), "*");
+					}
+				    }
 				    currentClass.addProperty(property);
 				}
 			    }
-
 			    ClassProperty.listPropreties.add(property);
 			}
 		    }
@@ -153,7 +165,8 @@ public class Main {
 	}
     }
 
-    public static void createJavaClasse() {
+    public static void generateJavaClasse() {
+
 	for (ClassItem currentClass : ClassItem.listClass) {
 
 	    String className = currentClass.getClassName();
@@ -161,24 +174,28 @@ public class Main {
 	    className = className.substring(0, 1).toUpperCase() + className.substring(1);
 
 	    ArrayList<ClassProperty> listAttributs = currentClass.getListProperty();
+
 	    StringBuilder header = new StringBuilder();
 
-	    header.append("package com.gn;" + "public class " + className + "{\n");
+	    header.append("package com.gn;\n\n" + "public class " + className + "{\n");
 
 	    for (ClassProperty att : listAttributs) {
 
 		StringBuilder atts = new StringBuilder();
+
 		String typeAtt = att.getType().substring(0, 1).toUpperCase() + att.getType().substring(1);
 		String nameAtt = att.getName();
 
+		// currentClass.
 		atts.append("private " + typeAtt + " " + nameAtt + ";\n");
+
 		header.append(atts);
 
 		header.append(generateGetteurAndSetteur(typeAtt, nameAtt));
 
 	    }
 
-	    header.append("public " + className + "(){}" + "}");
+	    header.append("\npublic " + className + "(){}" + "}\n\n");// generation du constructeur
 
 	    List<StringBuilder> lines = Arrays.asList(header);
 
@@ -188,7 +205,12 @@ public class Main {
 		Files.write(file, lines, StandardCharsets.UTF_8);
 
 		Path monFichierCopie = Paths.get("src/com/gn/" + className + ".java");
-		Path files = Files.move(file, monFichierCopie);
+
+		Files.move(file, monFichierCopie);
+
+		File f = new File("src/com/gn/" + className + ".java");
+
+		listFiles.add(f);
 	    } catch (IOException e) {
 		e.printStackTrace();
 	    }
@@ -197,13 +219,13 @@ public class Main {
 
     private static StringBuilder generateGetteurAndSetteur(String typeAtt, String name) {
 	StringBuilder setAndGet = new StringBuilder();
+
 	String capName = name.substring(0, 1).toUpperCase() + name.substring(1);
 
-	// creation du Setteur
-	setAndGet.append(
-		"public void set" + capName + " (" + typeAtt + " " + name + "){this." + name + " = " + name + ";}");
-	// creation du Getteur
-	setAndGet.append("public " + typeAtt + " get" + capName + " (){return this." + name + ";}");
+	setAndGet.append("public void set" + capName + " (" + typeAtt + " " + name + "){\nthis." + name + " = " + name
+		+ ";\n}\n");
+
+	setAndGet.append("public " + typeAtt + " get" + capName + " (){\nreturn this." + name + ";\n}\n");
 
 	return setAndGet;
     }
