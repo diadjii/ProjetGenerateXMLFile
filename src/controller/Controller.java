@@ -17,6 +17,7 @@ import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
 import view.ClassItem;
 import view.HelperClass;
+import view.MyCompiler;
 
 public class Controller implements Initializable {
     @FXML
@@ -34,6 +35,11 @@ public class Controller implements Initializable {
     @FXML
     void generateClasse(ActionEvent event) {
 	HelperClass.generateClassFromXSD();
+
+	HelperClass.listFiles.forEach(file -> {
+	    MyCompiler.compile(file);
+	});
+
 	String text = new String();
 	for (ClassItem c : ClassItem.listClass) {
 	    text += c;

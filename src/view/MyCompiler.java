@@ -1,11 +1,6 @@
 package view;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -16,7 +11,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-public class Compiler {
+public class MyCompiler {
 
     @SuppressWarnings("rawtypes")
     public static void compile(File file) {
@@ -41,35 +36,38 @@ public class Compiler {
 	if (result) {
 	    System.out.println("Succeeded");
 
-	    URLClassLoader classLoader = null;
-
-	    try {
-		classLoader = new URLClassLoader(new URL[] { new File("./").toURI().toURL() });
-	    } catch (MalformedURLException e1) {
-		e1.printStackTrace();
-	    }
-
-	    try {
-		Class loadedClass = classLoader.loadClass("com.gn.Livre");
-
-		Object obj = loadedClass.newInstance();
-
-		Class[] paramString = new Class[1];
-
-		paramString[0] = String.class;
-
-		Method setEditeur = loadedClass.getDeclaredMethod("setEditeur", paramString);
-
-		setEditeur.invoke(obj, "ESP");
-
-		Method getEditeur = loadedClass.getDeclaredMethod("getEditeur", null);
-
-		System.out.println(getEditeur.invoke(obj, null));
-
-	    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException
-		    | SecurityException | IllegalArgumentException | InvocationTargetException e) {
-		e.printStackTrace();
-	    }
+	    // URLClassLoader classLoader = null;
+	    //
+	    // try {
+	    // classLoader = new URLClassLoader(new URL[] { new File("./").toURI().toURL()
+	    // });
+	    // } catch (MalformedURLException e1) {
+	    // e1.printStackTrace();
+	    // }
+	    //
+	    // try {
+	    // Class loadedClass = classLoader.loadClass("com.gn.Livre");
+	    //
+	    // Object obj = loadedClass.newInstance();
+	    //
+	    // Class[] paramString = new Class[1];
+	    //
+	    // paramString[0] = String.class;
+	    //
+	    // Method setEditeur = loadedClass.getDeclaredMethod("setEditeur", paramString);
+	    //
+	    // setEditeur.invoke(obj, "ESP");
+	    //
+	    // Method getEditeur = loadedClass.getDeclaredMethod("getEditeur", null);
+	    //
+	    // System.out.println(getEditeur.invoke(obj, null));
+	    //
+	    // } catch (ClassNotFoundException | InstantiationException |
+	    // IllegalAccessException | NoSuchMethodException
+	    // | SecurityException | IllegalArgumentException | InvocationTargetException e)
+	    // {
+	    // e.printStackTrace();
+	    // }
 	}
     }
 

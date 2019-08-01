@@ -7,7 +7,7 @@ public class ClassItem {
     private String className;
     private ArrayList<ClassProperty> listProperty = new ArrayList<>();
 
-    private HashMap<String, String> propertiesOcc = new HashMap<>();
+    public HashMap<String, String> propertiesOcc = new HashMap<>();
 
     public static ArrayList<ClassItem> listClass = new ArrayList<>();
 
