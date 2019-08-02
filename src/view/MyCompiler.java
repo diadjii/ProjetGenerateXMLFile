@@ -35,7 +35,6 @@ public class MyCompiler {
 
 	if (result) {
 	    System.out.println("Succeeded");
-
 	    // URLClassLoader classLoader = null;
 	    //
 	    // try {

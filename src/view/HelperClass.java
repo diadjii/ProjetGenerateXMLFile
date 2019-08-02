@@ -186,8 +186,14 @@ public class HelperClass {
 		header.append(atts);
 
 		header.append(generateGetteurAndSetteur(typeAtt, nameAtt));
-
 	    }
+	    // if (currentClass.getListProperty().size() < 2) {
+	    // String type = currentClass.getListProperty().get(0).getType();
+	    // type = upperCaseFirst(type);
+	    // header.append("public void save(ArrayList<" + type + "> liste){" + "for(" +
+	    // type + " item : liste+"
+	    // + type + "){" + "System.out.println(item.getName());" + "}" + "}");
+	    // }
 
 	    header.append("\npublic " + className + "(){}" + "}\n\n");
 
@@ -221,5 +227,9 @@ public class HelperClass {
 	setAndGet.append("public " + typeAtt + " get" + capName + " (){\nreturn this." + name + ";\n}\n");
 
 	return setAndGet;
+    }
+
+    public static String upperCaseFirst(String name) {
+	return name.substring(0, 1).toUpperCase() + name.substring(1);
     }
 }
